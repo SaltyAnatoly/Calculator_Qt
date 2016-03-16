@@ -15,8 +15,6 @@
 #include <QDebug>
 #include <QtMath>
 
-#include <limits>
-
 enum Operation {Plus = 0, Minus, Divide, Multiply, Equal};
 enum Manipulation {PlusMinus = 0, SetPoint};
 enum MemoryOperation {MPlus = 0, MMinus, MStore, MRecall, MClear};

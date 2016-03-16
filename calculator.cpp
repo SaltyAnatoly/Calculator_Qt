@@ -151,7 +151,7 @@ Calculator::Calculator(QWidget *parent) :
     this->setLayout(mainLayout);
     this->setFixedSize(300, 420);
 
-    QRegExp regexp("-?[0-9]{1,6}[.]?[0-9]{0,6}");
+    QRegExp regexp("-?[0-9]{1,6}([.]{1,1}[0-9]{0,6})?");
     calculationLine->setValidator(new QRegExpValidator(regexp, this));
 
     currentOperand = 0;
@@ -244,12 +244,12 @@ void Calculator::calculate()
         if (currentOperand == 0)
         {
             errorLine->show();
-            errorLine->setText("Error! Illegal operation!");
+            errorLine->setText("Error! Invalid operation!");
         }
         else
         {
             secondOperand /= currentOperand;
-            lastAction->setText(QString::number(secondOperand, 'g', 12) + " /");
+            lastAction->setText(QString::number(secondOperand, 'g', 20) + " /");
         }
         break;
     case Multiply:
@@ -320,7 +320,7 @@ void Calculator::operationClicked(const int id)
                     calculate();
         }
         currentOperation = Divide;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " /");
+        lastAction->setText(QString::number(secondOperand, 'g', 20) + " /");
         break;
     case Multiply:
         if (isFirstOperation)
@@ -338,7 +338,7 @@ void Calculator::operationClicked(const int id)
         break;
     case Equal:
         calculate();
-        calculationLine->setText(QString::number(secondOperand, 'g', 12));
+        calculationLine->setText(QString::number(secondOperand, 'g', 20));
         break;
     }
     calculationLine->selectAll();
@@ -359,11 +359,11 @@ void Calculator::memoryButtonClicked(const int id)
             break;
         case MStore:
             memoryOperand = getValueFromCalculationLine();
-            memoryLine->setText("Value in memory: " + QString::number(memoryOperand));
+            memoryLine->setText("Value in memory: " + QString::number(memoryOperand, 'g', 20));
             break;
         case MRecall:
-            calculationLine->setText(QString::number(memoryOperand));
-            memoryLine->setText("Value in memory: " + QString::number(memoryOperand));
+            calculationLine->setText(QString::number(memoryOperand, 'g', 20));
+            //memoryLine->setText("Value in memory: " + QString::number(memoryOperand));
             break;
         case MClear:
             memoryOperand = 0;
@@ -382,7 +382,6 @@ void Calculator::deletingButtonClicked(const int id)
         lastAction->clear();
         currentOperand = 0;
         secondOperand = 0;
-        memoryOperand = 0;
         currentOperation = Plus;
         isFirstOperation = true;
         break;
@@ -395,6 +394,7 @@ void Calculator::deletingButtonClicked(const int id)
         calculationLine->setText(tempStr);
         break;
     }
+
 }
 
 void Calculator::manipulationButtonClicked(const int id)
@@ -430,7 +430,7 @@ void Calculator::specialOperationButtonClicked(const int id)
             if (currentOperand < 0)
             {
                 errorLine->show();
-                errorLine->setText("Error! Illegal operation!");
+                errorLine->setText("Error! Invalid operation!");
             } else
             {
                 calculationLine->setText(QString::number(sqrt(currentOperand), 'g', 12));
@@ -442,10 +442,13 @@ void Calculator::specialOperationButtonClicked(const int id)
             if (currentOperand == 0)
             {
                 errorLine->show();
-                errorLine->setText("Error! Illegal operation!");
+                errorLine->setText("Error! Invalid operation!");
             } else
             {
-                calculationLine->setText(QString::number(1 / currentOperand, 'g', 12));
+                if (calculationLine->text().contains('.') && calculationLine->text().length() > 13)
+                    calculationLine->setText(QString::number(1 / currentOperand, 'g', 12));
+                else
+                    calculationLine->setText(QString::number(1 / currentOperand, 'g', 20));
             }
             break;
         case Percent:
