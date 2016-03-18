@@ -97,7 +97,6 @@ private:
     void calculate();
 
 private slots:
-    void debugMessageBox();
     void numberClicked(const int id);
     void operationClicked(const int id);
     void memoryButtonClicked(const int id);

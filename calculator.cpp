@@ -15,7 +15,6 @@ Calculator::Calculator(QWidget *parent) :
     calculationLine->setAlignment(Qt::AlignRight);
     errorLine->setAlignment(Qt::AlignCenter);
     errorLine->setStyleSheet("QLabel{color : red;}");
-    errorLine->hide();
     lastAction->setAlignment(Qt::AlignRight);
     memoryLine->setAlignment(Qt::AlignRight);
     memoryLine->setText("Value in memory: " + QString::number(0));
@@ -57,7 +56,6 @@ Calculator::Calculator(QWidget *parent) :
     memClear = new QPushButton("MC", this);
 
     sqrrt = new QPushButton("√x", this);
-    //sqr = new QPushButton("x^2", this);
     percent = new QPushButton("%", this);
     inverse = new QPushButton("1/x", this);
 
@@ -149,9 +147,9 @@ Calculator::Calculator(QWidget *parent) :
     mainLayout->addWidget(buttonsGroupBox);
 
     this->setLayout(mainLayout);
-    this->setFixedSize(300, 420);
+    this->setFixedSize(300, 440);
 
-    QRegExp regexp("-?[0-9]{1,6}([.]{1,1}[0-9]{0,6})?");
+    QRegExp regexp("-?[0-9]{1,8}([.]{1,1}[0-9]{0,8})?");
     calculationLine->setValidator(new QRegExpValidator(regexp, this));
 
     currentOperand = 0;
@@ -194,7 +192,6 @@ Calculator::Calculator(QWidget *parent) :
     manipulatorsGroup->addButton(plusMinus, PlusMinus);
     manipulatorsGroup->addButton(point, SetPoint);
 
-    //connect(equal, SIGNAL(clicked(bool)), this, SLOT(debugMessageBox()));
     connect(numbersGroup, SIGNAL(buttonClicked(int)), this, SLOT(numberClicked(int)));
     connect(operationsGroup, SIGNAL(buttonClicked(int)), this, SLOT(operationClicked(int)));
     connect(memoryGroup, SIGNAL(buttonClicked(int)), this, SLOT(memoryButtonClicked(int)));
@@ -230,20 +227,19 @@ void Calculator::calculate()
         if (!isCalculationLineEmpty())
             currentOperand = getValueFromCalculationLine();
         secondOperand += currentOperand;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " +");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " +");
         break;
     case Minus:
         if (!isCalculationLineEmpty())
             currentOperand = getValueFromCalculationLine();
         secondOperand -= currentOperand;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " -");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " -");
         break;
     case Divide:
         if (!isCalculationLineEmpty())
             currentOperand = getValueFromCalculationLine();
         if (currentOperand == 0)
         {
-            errorLine->show();
             errorLine->setText("Error! Invalid operation!");
         }
         else
@@ -256,28 +252,21 @@ void Calculator::calculate()
         if (!isCalculationLineEmpty())
             currentOperand = getValueFromCalculationLine();
         secondOperand *= currentOperand;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " *");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " *");
         break;
     }
-    calculationLine->setText(QString::number(currentOperand, 'g', 12));
-}
-
-void Calculator::debugMessageBox()
-{
-    QString tempStr;
-    tempStr = QString::number(getValueFromCalculationLine(), 'g', 12);
-    QMessageBox::information(this, "Info", tempStr);
+    calculationLine->setText(QString::number(currentOperand, 'g', 16));
 }
 
 void Calculator::numberClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     calculationLine->insert(QString::number(id));
 }
 
 void Calculator::operationClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     switch (id)
     {
     case Plus:
@@ -292,7 +281,7 @@ void Calculator::operationClicked(const int id)
                 calculate();
         }
         currentOperation = Plus;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " +");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " +");
         break;
     case Minus:
         if (isFirstOperation)
@@ -306,7 +295,7 @@ void Calculator::operationClicked(const int id)
                 calculate();
         }
         currentOperation = Minus;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " -");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " -");
         break;
     case Divide:
         if (isFirstOperation)
@@ -334,11 +323,11 @@ void Calculator::operationClicked(const int id)
                 calculate();
         }
         currentOperation = Multiply;
-        lastAction->setText(QString::number(secondOperand, 'g', 12) + " *");
+        lastAction->setText(QString::number(secondOperand, 'g', 16) + " *");
         break;
     case Equal:
         calculate();
-        calculationLine->setText(QString::number(secondOperand, 'g', 20));
+        calculationLine->setText(QString::number(secondOperand, 'g', 16));
         break;
     }
     calculationLine->selectAll();
@@ -346,7 +335,7 @@ void Calculator::operationClicked(const int id)
 
 void Calculator::memoryButtonClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     switch (id)
     {
         case MPlus:
@@ -363,7 +352,6 @@ void Calculator::memoryButtonClicked(const int id)
             break;
         case MRecall:
             calculationLine->setText(QString::number(memoryOperand, 'g', 20));
-            //memoryLine->setText("Value in memory: " + QString::number(memoryOperand));
             break;
         case MClear:
             memoryOperand = 0;
@@ -374,7 +362,7 @@ void Calculator::memoryButtonClicked(const int id)
 
 void Calculator::deletingButtonClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     switch (id)
     {
     case Global:
@@ -399,20 +387,20 @@ void Calculator::deletingButtonClicked(const int id)
 
 void Calculator::manipulationButtonClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     switch (id)
     {
         case PlusMinus:
         {
             double tempVar = getValueFromCalculationLine();
             tempVar *= -1;
-            calculationLine->setText(QString::number(tempVar, 'g', 12));
+            calculationLine->setText(QString::number(tempVar, 'g', 16));
         } break;
         case SetPoint:
         {
             if (!calculationLine->text().contains('.'))
             {
-                QString tempStr = QString::number(getValueFromCalculationLine(), 'g', 12);
+                QString tempStr = QString::number(getValueFromCalculationLine(), 'g', 16);
                 calculationLine->setText(tempStr + '.');
             }
         } break;
@@ -421,7 +409,7 @@ void Calculator::manipulationButtonClicked(const int id)
 
 void Calculator::specialOperationButtonClicked(const int id)
 {
-    errorLine->hide();
+    errorLine->clear();
     switch (id)
     {
         case Sqrt:
@@ -429,11 +417,10 @@ void Calculator::specialOperationButtonClicked(const int id)
                 currentOperand = getValueFromCalculationLine();
             if (currentOperand < 0)
             {
-                errorLine->show();
                 errorLine->setText("Error! Invalid operation!");
             } else
             {
-                calculationLine->setText(QString::number(sqrt(currentOperand), 'g', 12));
+                calculationLine->setText(QString::number(sqrt(currentOperand), 'g', 16));
             }
             break;
         case Inverse:
@@ -441,12 +428,11 @@ void Calculator::specialOperationButtonClicked(const int id)
                 currentOperand = getValueFromCalculationLine();
             if (currentOperand == 0)
             {
-                errorLine->show();
                 errorLine->setText("Error! Invalid operation!");
             } else
             {
                 if (calculationLine->text().contains('.') && calculationLine->text().length() > 13)
-                    calculationLine->setText(QString::number(1 / currentOperand, 'g', 12));
+                    calculationLine->setText(QString::number(1 / currentOperand, 'g', 16));
                 else
                     calculationLine->setText(QString::number(1 / currentOperand, 'g', 20));
             }
@@ -454,7 +440,8 @@ void Calculator::specialOperationButtonClicked(const int id)
         case Percent:
             if (!isCalculationLineEmpty())
                 currentOperand = getValueFromCalculationLine();
-            calculationLine->setText(QString::number(secondOperand * currentOperand / 100, 'g', 12));
+            calculationLine->setText(QString::number(secondOperand * currentOperand / 100, 'g', 16));
+            currentOperand = 0;
             break;
     }
     calculationLine->selectAll();
